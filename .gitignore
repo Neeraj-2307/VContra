@@ -1,0 +1,7 @@
+# Compiled binaries
+main
+vcontra
+
+# System and IDE configs
+.vscode/
+.DS_Store
