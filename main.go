@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"vcontra/internal/animation"
 	"vcontra/internal/game"
+	"vcontra/internal/service"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -24,31 +25,14 @@ func main() {
 		log.Fatalf("Failed to parse json config: %v", err)
 	}
 
-	// 2. Initialize our map and playlist arrays
-	loadedAnimations := make(map[string]animation.SpriteSheet)
-	var playlist []string
-
-	// Loop through every single entry found inside your JSON file and load it
-	for imageName := range database {
-		sheet, err := animation.LoadAnimation(configPath, imageName)
-		if err != nil {
-			log.Printf("Skipping asset %s due to loading error: %v", imageName, err)
-			continue
-		}
-		loadedAnimations[imageName] = sheet
-		playlist = append(playlist, imageName)
-		log.Printf("Loaded asset into cycle sequence: %s", imageName)
-	}
-
-	if len(playlist) == 0 {
-		log.Fatalf("No valid sprite sheet assets were loaded successfully.")
-	}
+	// Initialize state management (which loads all animations and sets up initial state)
+	stateManager := service.NewStateManagementService(configPath, database)
 
 	gameInstance := &game.Game{
-		Animations:   loadedAnimations,
-		Playlist:     playlist,
-		CurrentAsset: 0,
-		CurrentFrame: 0,
+		Animations:       stateManager.GetAnimations(),
+		CurrentAssetInfo: stateManager.CurrentState.CurrentAssetName(),
+		CurrentFrame:     0,
+		StateManager:     stateManager,
 	}
 
 	// Grab dimensions of our very first asset to initialize the window parameters

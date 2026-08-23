@@ -6,21 +6,26 @@ import (
 	"image"
 	_ "image/png" // Registers the PNG decoder
 	"os"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // SpriteConfig matches the structure of our JSON entries
 type SpriteConfig struct {
-	TotalFrames int `json:"total_frames"`
+	TotalFrames   int    `json:"total_frames"`
+	StateKind     string `json:"state_kind"`
+	SoldierNumber int    `json:"soldier_number"`
 }
 
 // SpriteSheet holds the raw pixel grid and calculated dimensions.
 // All field names MUST be capitalized so main.go can access them!
 type SpriteSheet struct {
-	EbitenImage *ebiten.Image
-	TotalFrames int
-	FrameWidth  int
-	FrameHeight int
+	EbitenImage   *ebiten.Image
+	TotalFrames   int
+	FrameWidth    int
+	FrameHeight   int
+	StateKind     string
+	SoldierNumber int
 }
 
 // LoadAnimation reads the JSON config, opens the image, and computes dimensions
@@ -55,6 +60,7 @@ func LoadAnimation(jsonPath string, imageName string) (SpriteSheet, error) {
 		return SpriteSheet{}, fmt.Errorf("failed to decode image: %v", err)
 	}
 
+	println("Loaded image:", imageName, "with", config.TotalFrames, "frames, state kind:", config.StateKind, "soldier number:", config.SoldierNumber)
 	// 3. Do the dynamic division math
 	imgWidth := img.Bounds().Dx()
 	imgHeight := img.Bounds().Dy()
@@ -64,10 +70,12 @@ func LoadAnimation(jsonPath string, imageName string) (SpriteSheet, error) {
 	ebitenImg := ebiten.NewImageFromImage(img)
 
 	return SpriteSheet{
-		EbitenImage: ebitenImg,
-		TotalFrames: config.TotalFrames,
-		FrameWidth:  calculatedFrameWidth,
-		FrameHeight: imgHeight,
+		EbitenImage:   ebitenImg,
+		TotalFrames:   config.TotalFrames,
+		FrameWidth:    calculatedFrameWidth,
+		FrameHeight:   imgHeight,
+		StateKind:     config.StateKind,
+		SoldierNumber: config.SoldierNumber,
 	}, nil
 }
 

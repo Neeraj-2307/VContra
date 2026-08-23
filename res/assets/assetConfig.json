@@ -1,13 +1,13 @@
 {
-  "res/assets/Soldier_1/Attack.png": { "total_frames": 3 },
-  "res/assets/Soldier_1/Dead.png": { "total_frames": 4 },
-  "res/assets/Soldier_1/Explosion.png": { "total_frames": 9 },
-  "res/assets/Soldier_1/Grenade.png": { "total_frames": 9 },
-  "res/assets/Soldier_1/Hurt.png": { "total_frames": 3 },
-  "res/assets/Soldier_1/Idle.png": { "total_frames": 7 },
-  "res/assets/Soldier_1/Recharge.png": { "total_frames": 13 },
-  "res/assets/Soldier_1/Run.png": { "total_frames": 8 },
-  "res/assets/Soldier_1/Shot_1.png": { "total_frames": 4 },
-  "res/assets/Soldier_1/Shot_2.png": { "total_frames": 4 },
-  "res/assets/Soldier_1/Walk.png": { "total_frames": 7 }
+  "res/assets/Soldier_1/Attack.png": { "total_frames": 3, "state_kind": "IDLE", "soldier_number": 1 },
+  "res/assets/Soldier_1/Dead.png": { "total_frames": 4, "state_kind": "TRANSITION", "soldier_number": 1 },
+  "res/assets/Soldier_1/Explosion.png": { "total_frames": 9, "state_kind": "TRANSITION", "soldier_number": 1 },
+  "res/assets/Soldier_1/Grenade.png": { "total_frames": 9, "state_kind": "IDLE", "soldier_number": 1 },
+  "res/assets/Soldier_1/Hurt.png": { "total_frames": 3, "state_kind": "TRANSITION", "soldier_number": 1 },
+  "res/assets/Soldier_1/Idle.png": { "total_frames": 7, "state_kind": "IDLE", "soldier_number": 1 },
+  "res/assets/Soldier_1/Recharge.png": { "total_frames": 13, "state_kind": "IDLE", "soldier_number": 1 },
+  "res/assets/Soldier_1/Run.png": { "total_frames": 8, "state_kind": "MOVING", "soldier_number": 1 },
+  "res/assets/Soldier_1/Shot_1.png": { "total_frames": 4, "state_kind": "IDLE", "soldier_number": 1 },
+  "res/assets/Soldier_1/Shot_2.png": { "total_frames": 4, "state_kind": "IDLE", "soldier_number": 1 },
+  "res/assets/Soldier_1/Walk.png": { "total_frames": 7, "state_kind": "MOVING", "soldier_number": 1 }
 }

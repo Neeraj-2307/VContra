@@ -3,21 +3,22 @@ package game
 import (
 	"image/color"
 	"vcontra/internal/animation"
+	"vcontra/internal/service"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Game struct {
-	Animations   map[string]animation.SpriteSheet
-	Playlist     []string // Keeps track of the order of animations (e.g., ["walk.png", "idle.png", "jump.png"])
-	CurrentAsset int      // Index pointing to the active animation in our playlist
-	CurrentFrame int
-	TickCounter  int
+	Animations       map[string]animation.SpriteSheet
+	CurrentAssetInfo string // info of the current asset being displayed
+	CurrentFrame     int
+	TickCounter      int
+	StateManager     *service.StateManagementService
 }
 
 // GetActiveSheet is a clean helper to grab whichever sprite sheet is playing right now
 func (g *Game) GetActiveSheet() animation.SpriteSheet {
-	activeName := g.Playlist[g.CurrentAsset]
-	return g.Animations[activeName]
+	return g.Animations[g.CurrentAssetInfo]
 }
 
 func (g *Game) Update() error {
@@ -34,7 +35,8 @@ func (g *Game) Update() error {
 		// reset the frame count and cycle to the NEXT image asset in our JSON list!
 		if g.CurrentFrame >= currentSheet.TotalFrames {
 			g.CurrentFrame = 0
-			g.CurrentAsset = (g.CurrentAsset + 1) % len(g.Playlist)
+			g.StateManager.GetNextState()
+			g.CurrentAssetInfo = g.StateManager.CurrentState.CurrentAssetName()
 		}
 	}
 	return nil
