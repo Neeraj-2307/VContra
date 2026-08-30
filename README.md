@@ -2,6 +2,10 @@
 
 A lightweight sprite-based animation prototype built with Go and Ebiten. The project loads sprite sheets from the asset config, tracks state transitions by soldier, and renders looping animation frames with a transparent windowed setup.
 
+## Demo
+
+![vcontra demo](docs/demo.gif)
+
 ## Features
 
 - Sprite sheet loading from JSON metadata
