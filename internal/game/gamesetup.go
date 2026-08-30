@@ -14,6 +14,11 @@ type Game struct {
 	CurrentFrame     int
 	TickCounter      int
 	StateManager     *service.StateManagementService
+	isDragging       bool
+	dragStartX       int
+	dragStartY       int
+	windowStartX     int
+	windowStartY     int
 }
 
 // GetActiveSheet is a clean helper to grab whichever sprite sheet is playing right now
@@ -22,6 +27,23 @@ func (g *Game) GetActiveSheet() animation.SpriteSheet {
 }
 
 func (g *Game) Update() error {
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		mouseX, mouseY := ebiten.CursorPosition()
+
+		if !g.isDragging {
+			g.isDragging = true
+			g.dragStartX = mouseX
+			g.dragStartY = mouseY
+			g.windowStartX, g.windowStartY = ebiten.WindowPosition()
+		} else {
+			deltaX := mouseX - g.dragStartX
+			deltaY := mouseY - g.dragStartY
+			ebiten.SetWindowPosition(g.windowStartX+deltaX, g.windowStartY+deltaY)
+		}
+	} else {
+		g.isDragging = false
+	}
+
 	g.TickCounter++
 
 	// Advance the frame index every 10 ticks (6 FPS)
