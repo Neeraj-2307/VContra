@@ -10,15 +10,15 @@ import (
 type StateManagementService struct {
 	CurrentState          models.AssetState
 	animations            map[string]animation.SpriteSheet
-	movingStateAssets     []string // Pre-organized MOVING asset names
-	idleStateAssets       []string // Pre-organized IDLE asset names
-	transitionStateAssets []string // Pre-organized TRANSITION asset names
+	movingStateAssets     [][]string // Pre-organized MOVING asset names by soldier number
+	idleStateAssets       [][]string // Pre-organized IDLE asset names by soldier number
+	transitionStateAssets [][]string // Pre-organized TRANSITION asset names by soldier number
 }
 
 // NewStateManagementService loads all animations and initializes with the first one
 func NewStateManagementService(configPath string, database map[string]interface{}) *StateManagementService {
 	animations := make(map[string]animation.SpriteSheet)
-	var movingAssets, idleAssets, transitionAssets []string
+	var movingAssets, idleAssets, transitionAssets [][]string
 	var firstAssetName string
 
 	// Load all animations from database and organize by state kind
@@ -32,16 +32,23 @@ func NewStateManagementService(configPath string, database map[string]interface{
 		if firstAssetName == "" {
 			firstAssetName = imageName
 		}
-		log.Printf("Loaded asset into cycle sequence: %s", imageName)
 
-		// Organize by state kind for fast lookup later
+		// Organize by state kind for fast lookup later, indexed by soldier number
+		soldierNum := sheet.SoldierNumber
+		// Ensure the slice is large enough for this soldier number
+		for soldierNum >= len(movingAssets) {
+			movingAssets = append(movingAssets, []string{})
+			idleAssets = append(idleAssets, []string{})
+			transitionAssets = append(transitionAssets, []string{})
+		}
+
 		switch sheet.StateKind {
 		case "MOVING":
-			movingAssets = append(movingAssets, imageName)
+			movingAssets[soldierNum] = append(movingAssets[soldierNum], imageName)
 		case "IDLE":
-			idleAssets = append(idleAssets, imageName)
+			idleAssets[soldierNum] = append(idleAssets[soldierNum], imageName)
 		case "TRANSITION":
-			transitionAssets = append(transitionAssets, imageName)
+			transitionAssets[soldierNum] = append(transitionAssets[soldierNum], imageName)
 		}
 	}
 
@@ -70,15 +77,36 @@ func (s *StateManagementService) GetAnimations() map[string]animation.SpriteShee
 // GetNextState returns the next state based on current state logic
 func (s *StateManagementService) GetNextState() models.AssetState {
 	var assetList []string
+	soldierNum := s.CurrentState.SoldierNumber()
 
-	// Pick the right asset list based on current state kind
+	// Pick the right asset list based on current state kind and soldier number
 	switch s.CurrentState.StateKind() {
 	case models.MovingState:
-		assetList = s.movingStateAssets
+		// While moving, stay in moving/idle states of the same soldier
+		if soldierNum < len(s.movingStateAssets) {
+			assetList = s.movingStateAssets[soldierNum]
+			assetList = append(assetList, s.idleStateAssets[soldierNum]...)
+		}
 	case models.IdleState:
-		assetList = s.idleStateAssets
+		// While idle, can go to moving/idle/transition of same soldier
+		if soldierNum < len(s.idleStateAssets) {
+			assetList = s.idleStateAssets[soldierNum]
+			assetList = append(assetList, s.movingStateAssets[soldierNum]...)
+			assetList = append(assetList, s.transitionStateAssets[soldierNum]...)
+		}
 	case models.TransitionState:
-		assetList = s.transitionStateAssets
+		// Load MOVING and IDLE assets for all soldiers except the current one
+		// This transitions away from the current soldier to another one
+		for i := 0; i < len(s.movingStateAssets); i++ {
+			if i != soldierNum {
+				assetList = append(assetList, s.movingStateAssets[i]...)
+			}
+		}
+		for i := 0; i < len(s.idleStateAssets); i++ {
+			if i != soldierNum {
+				assetList = append(assetList, s.idleStateAssets[i]...)
+			}
+		}
 	}
 
 	// If no assets available for this state kind, stay in current state
@@ -90,6 +118,5 @@ func (s *StateManagementService) GetNextState() models.AssetState {
 	randomAssetName := assetList[rand.Intn(len(assetList))]
 	sheet := s.animations[randomAssetName]
 	s.CurrentState = models.NewStateFromKind(sheet.StateKind, sheet.SoldierNumber, randomAssetName)
-
 	return s.CurrentState
 }

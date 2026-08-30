@@ -60,7 +60,6 @@ func LoadAnimation(jsonPath string, imageName string) (SpriteSheet, error) {
 		return SpriteSheet{}, fmt.Errorf("failed to decode image: %v", err)
 	}
 
-	println("Loaded image:", imageName, "with", config.TotalFrames, "frames, state kind:", config.StateKind, "soldier number:", config.SoldierNumber)
 	// 3. Do the dynamic division math
 	imgWidth := img.Bounds().Dx()
 	imgHeight := img.Bounds().Dy()
